@@ -61,4 +61,7 @@ funcionario* inserirFuncionario(funcionario *lista, char *nome, int matricula,
 dependente* inserirDependente(dependente *lista, char *nome, int codigo,
 		char* data_nasc, char* parentesco);
 
+// util
+char** str_split(char* a_str, const char a_delim);
+
 #endif /* BIBLIOTECA_C_ */
