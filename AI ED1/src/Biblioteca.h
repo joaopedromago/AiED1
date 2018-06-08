@@ -51,7 +51,7 @@ void obterMes(int *mes);
 void obterDia(int *dia);
 void preencherCargo(char *cargo);
 void preencherNome(char *nome);
-void preencherSalario(double *salario);
+void preencherSalario(double *salario, char *cargo, int qtdDependentes);
 void preencherMatricula(int *matricula);
 void preencherQtdeDependentes(int *qtde);
 
@@ -63,5 +63,7 @@ dependente* inserirDependente(dependente *lista, char *nome, int codigo,
 
 // util
 char** str_split(char* a_str, const char a_delim);
+void montarData(char *data, int ano, int mes, int dia);
+int gerarNumeroAleatorio(int max);
 
 #endif /* BIBLIOTECA_C_ */

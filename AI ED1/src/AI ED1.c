@@ -12,6 +12,7 @@ main() {
 
 void menu() {
 	char escolha[1];
+	escolha[0] = '\0';
 
 	printf("\n---------------------------------------------");
 	printf("\nA – Inserir funcionário ---------------------");
@@ -23,6 +24,7 @@ void menu() {
 	printf("\n------- Escolha uma das opções acima --------");
 
 	gets(escolha);
+
 	strupr(escolha);
 
 	validarEscolha(escolha);
@@ -51,13 +53,14 @@ void validarEscolha(char* escolha) {
 
 void cadastrarFuncionario() {
 	funcionario *lista;
-	char *data_nasc, *data_admis, *cargo, *nome;
+	char data_nasc[DATE_LEN], data_admis[DATE_LEN], cargo[1], nome[MAX_NOME];
 	double salario;
 	int matricula, qtdeDependentes;
 	dependente dependente;
 
 	preencherDataNasc(data_nasc);
 	preencherDataAdmis(data_admis, data_nasc);
+	preencherCargo(cargo);
 	// inserirFuncionario(lista, nome, matricula, data_nasc, data_admis, cargo, salario, qtdeDependentes, dependente);
 
 	printf("\n teste2: %s \n", data_nasc);
@@ -79,8 +82,6 @@ void preencherDataNasc(char *data_nasc) {
 	int minimoDias = ((tm.tm_year + 1900 - IDADEMINIMA) * 365)
 			+ ((tm.tm_mon + 1) * 30) + tm.tm_mday;
 
-	char buf[DATE_LEN];
-
 	printf("\nInforme a Data de Nascimento:");
 
 	obterAno(anoPont);
@@ -95,28 +96,15 @@ void preencherDataNasc(char *data_nasc) {
 		return;
 	}
 
-	data_nasc[0] = '\0';
-
-	sprintf(buf, "%d", ano);
-	strcpy(data_nasc, buf);
-
-	strcat(data_nasc, "/");
-
-	sprintf(buf, "%d", mes);
-	strcat(data_nasc, buf);
-
-	strcat(data_nasc, "/");
-
-	sprintf(buf, "%d", dia);
-	strcat(data_nasc, buf);
+	montarData(data_nasc, ano, mes, dia);
 }
 
 void preencherDataAdmis(char *data_admis, char *data_nasc) {
 
 	int ano, mes, dia, idadeDias;
-
-	time_t t = time(NULL);
-	struct tm tm = *localtime(&t);
+	int *anoPont = &ano;
+	int *mesPont = &mes;
+	int *diaPont = &dia;
 
 	char data_nasc_aux[DATE_LEN];
 
@@ -127,19 +115,14 @@ void preencherDataAdmis(char *data_admis, char *data_nasc) {
 	if (numeros) {
 		int i;
 		for (i = 0; *(numeros + i); i++) {
-//			printf("%s", *(numeros + i));
-			int x = 0;
+			int x = (int) strtol(*(numeros + i), (char **) NULL, 10);
 
-			sprintf(*(numeros + i), "%d", x );
 			if (i == 0) {
 				ano = x;
-				printf("\n%i", ano);
 			} else if (i == 1) {
 				mes = x;
-				printf("\n%i", mes);
 			} else {
 				dia = x;
-				printf("\n%i", dia);
 			}
 
 			free(*(numeros + i));
@@ -150,30 +133,42 @@ void preencherDataAdmis(char *data_admis, char *data_nasc) {
 
 	int maximoDias = (ano * 365) + (mes * 30) + dia;
 
-	char buf[12];
+	printf("\nInforme a Data de Admissão:");
 
-	printf("\nInforme a Data de Nascimento:");
+	obterAno(anoPont);
+	obterMes(mesPont);
+	obterDia(diaPont);
 
 	idadeDias = (ano * 365) + (mes * 30) + dia;
 
 	if (idadeDias < maximoDias) {
 		printf(
 				"\nA data de admissão não pode ser menor que a data de nascimento");
-		preencherDataNasc(data_admis);
+		preencherDataAdmis(data_admis, data_nasc);
+		return;
 	}
 
-	sprintf(buf, "%d", ano);
-	strcpy(data_admis, buf);
+	montarData(data_admis, ano, mes, dia);
+}
 
-	strcat(data_admis, "/");
+void montarData(char *data, int ano, int mes, int dia) {
+
+	data[0] = '\0';
+
+	char buf[DATE_LEN];
+
+	sprintf(buf, "%d", ano);
+	strcpy(data, buf);
+
+	strcat(data, "/");
 
 	sprintf(buf, "%d", mes);
-	strcat(data_admis, buf);
+	strcat(data, buf);
 
-	strcat(data_admis, "/");
+	strcat(data, "/");
 
 	sprintf(buf, "%d", dia);
-	strcat(data_admis, buf);
+	strcat(data, buf);
 }
 
 void obterAno(int *ano) {
@@ -210,15 +205,44 @@ void obterDia(int *dia) {
 }
 
 void preencherCargo(char *cargo) {
+	printf("Digite um cargo:");
+	printf("E – Estagiário");
+	printf("J – Nível Júnior");
+	printf("P – Nível Pleno");
+	printf("S – Nível Sênior");
+	printf("G – Nível Gerencial");
 
+	gets(cargo);
+	strupr(cargo);
+
+	if (strcmp(cargo, "E") == 1 && strcmp(cargo, "J") == 1
+			&& strcmp(cargo, "P") == 1 && strcmp(cargo, "S") == 1
+			&& strcmp(cargo, "G") == 1) {
+		printf("Opção inválida!");
+		preencherCargo(cargo);
+	}
 }
 
 void preencherNome(char *nome) {
-
+	gets(nome);
 }
 
-void preencherSalario(double *salario) {
+void preencherSalario(double *salario, char *cargo, int qtdDependentes) {
+	double salarioMinimo = 880;
 
+	if (strcmp(cargo, "E") == 0) {
+		*salario = salarioMinimo + (qtdDependentes * 15.9);
+	} else if (strcmp(cargo, "J") == 0) {
+		*salario = (3 * salarioMinimo) + (qtdDependentes * 23.15);
+	} else if (strcmp(cargo, "P") == 0) {
+		*salario = (5 * salarioMinimo) + (qtdDependentes * 35.72);
+	} else if (strcmp(cargo, "S") == 0) {
+		*salario = (7 * salarioMinimo) + (qtdDependentes * 49);
+	} else if (strcmp(cargo, "G") == 0) {
+		*salario = (9 * salarioMinimo) + (qtdDependentes * 68.29);
+	} else {
+		preencherSalario(salario, cargo, qtdDependentes);
+	}
 }
 
 void preencherMatricula(int *matricula) {
@@ -226,7 +250,13 @@ void preencherMatricula(int *matricula) {
 }
 
 void preencherQtdeDependentes(int *qtde) {
+	printf("Quantos dependente você possui? ( 0 a 10 )");
 
+	scanf('%d', qtde);
+
+	if (*qtde < 0 || *qtde > 10) {
+		preencherQtdeDependentes(qtde);
+	}
 }
 
 funcionario* inserirFuncionario(funcionario *lista, char *nome, int matricula,
@@ -309,4 +339,28 @@ char** str_split(char* a_str, const char a_delim) {
 	}
 
 	return result;
+}
+
+int gerarNumeroAleatorio(int max) {
+	if ((max - 1) == RAND_MAX) {
+		return rand();
+	} else {
+		// Supporting larger values for n would requires an even more
+		// elaborate implementation that combines multiple calls to rand()
+		assert(max <= RAND_MAX);
+
+		// Chop off all of the values that would cause skew...
+		int end = RAND_MAX / max; // truncate skew
+		assert(end > 0);
+		end *= max;
+
+		// ... and ignore results from rand() that fall above that limit.
+		// (Worst case the loop condition should succeed 50% of the time,
+		// so we can expect to bail out of this loop pretty quickly.)
+		int r;
+		while ((r = rand()) >= end)
+			;
+
+		return r % max;
+	}
 }
