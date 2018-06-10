@@ -54,14 +54,20 @@ void validarEscolha(char* escolha) {
 void cadastrarFuncionario() {
 	funcionario *lista;
 	char data_nasc[DATE_LEN], data_admis[DATE_LEN], cargo[1], nome[MAX_NOME];
-	double salario;
-	int matricula, qtdeDependentes;
-	dependente dependente;
+	double salario = 0;
+	int matricula = 0, qtdeDependentes = 0;
+	dependente *listaDependentes;
 
+	preencherMatricula(matricula);
 	preencherDataNasc(data_nasc);
 	preencherDataAdmis(data_admis, data_nasc);
 	preencherCargo(cargo);
-	// inserirFuncionario(lista, nome, matricula, data_nasc, data_admis, cargo, salario, qtdeDependentes, dependente);
+	preencherQtdeDependentes(&qtdeDependentes);
+	preencherSalario(&salario, cargo, qtdeDependentes);
+	preencherNome(nome);
+	cadastrarDependentes(listaDependentes, qtdeDependentes);
+	inserirFuncionario(lista, nome, matricula, data_nasc, data_admis, cargo,
+			salario, qtdeDependentes, listaDependentes);
 
 	printf("\n teste2: %s \n", data_nasc);
 
@@ -252,7 +258,7 @@ void preencherMatricula(int *matricula) {
 void preencherQtdeDependentes(int *qtde) {
 	printf("Quantos dependente você possui? ( 0 a 10 )");
 
-	scanf('%d', qtde);
+	scanf("%i", qtde);
 
 	if (*qtde < 0 || *qtde > 10) {
 		preencherQtdeDependentes(qtde);
@@ -261,7 +267,7 @@ void preencherQtdeDependentes(int *qtde) {
 
 funcionario* inserirFuncionario(funcionario *lista, char *nome, int matricula,
 		char *data_nasc, char *data_admis, char *cargo, double salario,
-		int qtdeDependentes, dependente dependente) {
+		int qtdeDependentes, dependente *dependentes) {
 	funcionario *novo = (funcionario*) malloc(sizeof(funcionario)); //Criar espaço de memória
 	//Preencher funcionario
 	novo->matricula = matricula;
@@ -271,7 +277,7 @@ funcionario* inserirFuncionario(funcionario *lista, char *nome, int matricula,
 	strcpy(novo->cargo, cargo);
 	novo->salario = salario;
 	novo->qtdeDependentes = qtdeDependentes;
-	novo->dependente = dependente;
+	novo->dependentes = dependentes;
 
 	novo->proximo = lista;
 	return novo;
@@ -307,7 +313,6 @@ char** str_split(char* a_str, const char a_delim) {
 	delim[0] = a_delim;
 	delim[1] = 0;
 
-	/* Count how many elements will be extracted. */
 	while (*tmp) {
 		if (a_delim == *tmp) {
 			count++;
@@ -316,11 +321,8 @@ char** str_split(char* a_str, const char a_delim) {
 		tmp++;
 	}
 
-	/* Add space for trailing token. */
 	count += last_comma < (a_str + strlen(a_str) - 1);
 
-	/* Add space for terminating null string so caller
-	 knows where the list of returned strings ends. */
 	count++;
 
 	result = malloc(sizeof(char*) * count);
@@ -345,22 +347,28 @@ int gerarNumeroAleatorio(int max) {
 	if ((max - 1) == RAND_MAX) {
 		return rand();
 	} else {
-		// Supporting larger values for n would requires an even more
-		// elaborate implementation that combines multiple calls to rand()
 		assert(max <= RAND_MAX);
-
-		// Chop off all of the values that would cause skew...
-		int end = RAND_MAX / max; // truncate skew
+		int end = RAND_MAX / max;
 		assert(end > 0);
 		end *= max;
-
-		// ... and ignore results from rand() that fall above that limit.
-		// (Worst case the loop condition should succeed 50% of the time,
-		// so we can expect to bail out of this loop pretty quickly.)
 		int r;
 		while ((r = rand()) >= end)
 			;
 
 		return r % max;
 	}
+}
+
+void cadastrarDependentes(dependente *listaDependentes, int qtdeDependentes) {
+
+}
+
+int obterPosicaoFuncionario() {
+	int posicao = 0;
+
+	return posicao;
+}
+
+void excluirFuncionario(int posicao) {
+
 }
