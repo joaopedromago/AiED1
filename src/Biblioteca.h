@@ -12,9 +12,6 @@
 #define TAM 3
 #define DATE_LEN 10
 
-#define IDADEMINIMA 17
-#define IDADEMAXIMA 100
-
 //Estrutura
 struct dependente{
 	char 	nome[MAX_NOME];
@@ -42,9 +39,9 @@ typedef struct funcionario funcionario;
 
 void menu();
 void validarEscolha(char* escolha);
-void cadastrarFuncionario();
+funcionario* cadastrarFuncionario(funcionario *lista);
 
-void preencherDataNasc(char *data_nasc);
+void preencherDataNasc(char *data_nasc, int min, int max);
 void preencherDataAdmis(char *data_admis, char *data_nasc);
 void obterAno(int *ano);
 void obterMes(int *mes);
@@ -52,21 +49,26 @@ void obterDia(int *dia);
 void preencherCargo(char *cargo);
 void preencherNome(char *nome);
 void preencherSalario(double *salario, char *cargo, int qtdDependentes);
-void preencherMatricula(int *matricula);
+void preencherMatricula(char *matricula, char *nome);
 void preencherQtdeDependentes(int *qtde);
+void preencherParentesco(char *parentesco);
+
+int obterPosicaoFuncionario(funcionario *lista);
+void excluirFuncionario(int posicao);
+void alterarFuncionario(funcionario *lista);
+void exibirRelatorio(funcionario* lista);
 
 funcionario* inserirFuncionario(funcionario *lista, char *nome, int matricula,
 		char *data_nasc, char *data_admis, char *cargo, double salario, int qtdeDependentes,
 		dependente *dependentes);
 dependente* inserirDependente(dependente *lista, char *nome, int codigo,
 		char* data_nasc, char* parentesco);
-void cadastrarDependentes(dependente *listaDependentes, int qtdeDependentes);
+dependente* cadastrarDependentes(dependente *dependente);
 
 // util
 char** str_split(char* a_str, const char a_delim);
 void montarData(char *data, int ano, int mes, int dia);
 int gerarNumeroAleatorio(int max);
-int obterPosicaoFuncionario();
-void excluirFuncionario(int posicao);
+int obterPosicaoAlfabeto(char letra);
 
 #endif /* BIBLIOTECA_C_ */

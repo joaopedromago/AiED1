@@ -31,6 +31,8 @@ void menu() {
 }
 
 void validarEscolha(char* escolha) {
+	funcionario *lista;
+
 	while (strcmp(escolha, "A") && strcmp(escolha, "B") && strcmp(escolha, "C")
 			&& strcmp(escolha, "D") && strcmp(escolha, "E")) {
 		printf("\n------- Opção inválida --------");
@@ -39,42 +41,51 @@ void validarEscolha(char* escolha) {
 	}
 
 	if (strcmp(escolha, "A") == 0) {
-		cadastrarFuncionario();
+		lista = cadastrarFuncionario(lista);
 	} else if (strcmp(escolha, "B") == 0) {
-
+		int posicao = obterPosicaoFuncionario(lista);
+		excluirFuncionario(posicao);
 	} else if (strcmp(escolha, "C") == 0) {
-
+		alterarFuncionario(lista);
 	} else if (strcmp(escolha, "D") == 0) {
-
+		exibirRelatorio(lista);
 	} else if (strcmp(escolha, "E") == 0) {
-
+		return;
 	}
+	menu();
 }
 
-void cadastrarFuncionario() {
-	funcionario *lista;
-	char data_nasc[DATE_LEN], data_admis[DATE_LEN], cargo[1], nome[MAX_NOME];
+funcionario* cadastrarFuncionario(funcionario *lista) {
+	char data_nasc[DATE_LEN], data_admis[DATE_LEN], cargo[1], nome[MAX_NOME],
+			matricula[9];
 	double salario = 0;
-	int matricula = 0, qtdeDependentes = 0;
-	dependente *listaDependentes;
+	int qtdeDependentes = 0;
+	dependente *listaDependentes = (dependente*) malloc(sizeof(dependente));
 
-	preencherMatricula(matricula);
-	preencherDataNasc(data_nasc);
+	preencherNome(nome);
+	preencherMatricula(matricula, nome);
+	printf("\nMatrícula = %s\n", matricula);
+	preencherDataNasc(data_nasc, 16, 100);
 	preencherDataAdmis(data_admis, data_nasc);
 	preencherCargo(cargo);
 	preencherQtdeDependentes(&qtdeDependentes);
 	preencherSalario(&salario, cargo, qtdeDependentes);
-	preencherNome(nome);
-	cadastrarDependentes(listaDependentes, qtdeDependentes);
-	inserirFuncionario(lista, nome, matricula, data_nasc, data_admis, cargo,
-			salario, qtdeDependentes, listaDependentes);
+	printf("\nSalário = %lf\n", salario);
 
-	printf("\n teste2: %s \n", data_nasc);
+	int i = 0;
+	dependente *proximo = listaDependentes;
+	for (i = 0; i < qtdeDependentes; i++) {
+		printf("\n Informe os dados do %d° dependente", (i + 1));
+		proximo = cadastrarDependentes(proximo);
+	}
 
-	menu();
+	printf("\n Funcionário inserido com sucesso \n");
+
+	return inserirFuncionario(lista, nome, matricula, data_nasc, data_admis,
+			cargo, salario, qtdeDependentes, listaDependentes);
 }
 
-void preencherDataNasc(char *data_nasc) {
+void preencherDataNasc(char *data_nasc, int min, int max) {
 	int ano, mes, dia, idadeDias;
 	int *anoPont = &ano;
 	int *mesPont = &mes;
@@ -83,10 +94,10 @@ void preencherDataNasc(char *data_nasc) {
 	time_t t = time(NULL);
 	struct tm tm = *localtime(&t);
 
-	int maximoDias = ((tm.tm_year + 1900 - IDADEMAXIMA) * 365)
-			+ ((tm.tm_mon + 1) * 30) + tm.tm_mday;
-	int minimoDias = ((tm.tm_year + 1900 - IDADEMINIMA) * 365)
-			+ ((tm.tm_mon + 1) * 30) + tm.tm_mday;
+	int maximoDias = ((tm.tm_year + 1900 - max) * 365) + ((tm.tm_mon + 1) * 30)
+			+ tm.tm_mday;
+	int minimoDias = ((tm.tm_year + 1900 - min) * 365) + ((tm.tm_mon + 1) * 30)
+			+ tm.tm_mday;
 
 	printf("\nInforme a Data de Nascimento:");
 
@@ -98,7 +109,7 @@ void preencherDataNasc(char *data_nasc) {
 
 	if (idadeDias > minimoDias || idadeDias < maximoDias) {
 		printf("\nO funcionário deve ter entre 16 e 100 anos");
-		preencherDataNasc(data_nasc);
+		preencherDataNasc(data_nasc, min, max);
 		return;
 	}
 
@@ -211,12 +222,12 @@ void obterDia(int *dia) {
 }
 
 void preencherCargo(char *cargo) {
-	printf("Digite um cargo:");
-	printf("E – Estagiário");
-	printf("J – Nível Júnior");
-	printf("P – Nível Pleno");
-	printf("S – Nível Sênior");
-	printf("G – Nível Gerencial");
+	printf("\nDigite um cargo:");
+	printf("\nE – Estagiário");
+	printf("\nJ – Nível Júnior");
+	printf("\nP – Nível Pleno");
+	printf("\nS – Nível Sênior");
+	printf("\nG – Nível Gerencial");
 
 	gets(cargo);
 	strupr(cargo);
@@ -230,6 +241,7 @@ void preencherCargo(char *cargo) {
 }
 
 void preencherNome(char *nome) {
+	printf("Digite o nome: ");
 	gets(nome);
 }
 
@@ -251,8 +263,48 @@ void preencherSalario(double *salario, char *cargo, int qtdDependentes) {
 	}
 }
 
-void preencherMatricula(int *matricula) {
+void preencherMatricula(char *matricula, char *nome) {
+	int num1 = 0, num2 = 0, num3 = 0, num4 = 0, num5 = 0, num6 = 0;
 
+	char primeiraletra = nome[0];
+	num1 = (int) primeiraletra / 10;
+	num2 = (int) primeiraletra % 10;
+
+	num3 = obterPosicaoAlfabeto(primeiraletra) / 10;
+	num4 = obterPosicaoAlfabeto(primeiraletra) % 10;
+
+	num5 = 0;
+	num6 = 1;
+
+	int ultimoDigito = 0;
+
+	int result1 = num1 * 5, result2 = num2 * 10, result3 = num3 * 15, result4 =
+			num4 * 20, result5 = num5 * 25, result6 = num6 * 30;
+	int result = result1 + result2 + result3 + result4 + result5 + result6;
+
+	int resultResto = result % 11;
+
+	if (resultResto != 10) {
+		ultimoDigito = resultResto;
+	}
+
+	char buf[10];
+
+	strcpy(matricula, &primeiraletra);
+	sprintf(buf, "%d", num1);
+	strcat(matricula, buf);
+	sprintf(buf, "%d", num2);
+	strcat(matricula, buf);
+	sprintf(buf, "%d", num3);
+	strcat(matricula, buf);
+	sprintf(buf, "%d", num4);
+	strcat(matricula, buf);
+	sprintf(buf, "%d", num5);
+	strcat(matricula, buf);
+	sprintf(buf, "%d", num6);
+	strcat(matricula, buf);
+	sprintf(buf, "%d", ultimoDigito);
+	strcat(matricula, buf);
 }
 
 void preencherQtdeDependentes(int *qtde) {
@@ -359,11 +411,36 @@ int gerarNumeroAleatorio(int max) {
 	}
 }
 
-void cadastrarDependentes(dependente *listaDependentes, int qtdeDependentes) {
+dependente* cadastrarDependentes(dependente *dependente) {
+	char nome[MAX_NOME], dataNascimento[DATE_LEN], parentesco[1];
+	int codigo;
 
+	codigo = gerarNumeroAleatorio(100);
+	preencherNome(nome);
+	preencherDataNasc(dataNascimento, 0, 24);
+	preencherParentesco(parentesco);
+
+	return inserirDependente(dependente, nome, codigo, dataNascimento,
+			parentesco);
 }
 
-int obterPosicaoFuncionario() {
+void preencherParentesco(char *parentesco) {
+	printf("\nDigite um parentesco:");
+	printf("\nE – Enteado");
+	printf("\nF – Filho/Filha");
+	printf("\nT – Tutelado");
+
+	gets(parentesco);
+	strupr(parentesco);
+
+	if (strcmp(parentesco, "E") == 1 && strcmp(parentesco, "F") == 1
+			&& strcmp(parentesco, "T") == 1) {
+		printf("Opção inválida!");
+		preencherCargo(parentesco);
+	}
+}
+
+int obterPosicaoFuncionario(funcionario *lista) {
 	int posicao = 0;
 
 	return posicao;
@@ -371,4 +448,71 @@ int obterPosicaoFuncionario() {
 
 void excluirFuncionario(int posicao) {
 
+}
+
+void alterarFuncionario(funcionario *lista){
+	excluirFuncionario(obterPosicaoFuncionario(lista));
+	cadastrarFuncionario(lista);
+}
+
+void exibirRelatorio(funcionario* lista){
+
+}
+
+int obterPosicaoAlfabeto(char letra) {
+	if (letra == 'A') {
+		return 1;
+	} else if (letra == 'B') {
+		return 2;
+	} else if (letra == 'C') {
+		return 3;
+	} else if (letra == 'D') {
+		return 4;
+	} else if (letra == 'E') {
+		return 5;
+	} else if (letra == 'F') {
+		return 6;
+	} else if (letra == 'G') {
+		return 7;
+	} else if (letra == 'H') {
+		return 8;
+	} else if (letra == 'I') {
+		return 9;
+	} else if (letra == 'J') {
+		return 10;
+	} else if (letra == 'K') {
+		return 11;
+	} else if (letra == 'L') {
+		return 12;
+	} else if (letra == 'M') {
+		return 13;
+	} else if (letra == 'N') {
+		return 14;
+	} else if (letra == 'O') {
+		return 15;
+	} else if (letra == 'P') {
+		return 16;
+	} else if (letra == 'Q') {
+		return 17;
+	} else if (letra == 'R') {
+		return 18;
+	} else if (letra == 'S') {
+		return 19;
+	} else if (letra == 'T') {
+		return 20;
+	} else if (letra == 'U') {
+		return 21;
+	} else if (letra == 'V') {
+		return 22;
+	} else if (letra == 'W') {
+		return 23;
+	} else if (letra == 'X') {
+		return 24;
+	} else if (letra == 'Y') {
+		return 25;
+	} else if (letra == 'Z') {
+		return 26;
+	} else {
+		return 0;
+	}
 }
